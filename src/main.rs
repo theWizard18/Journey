@@ -1,3 +1,8 @@
+mod lib;
+
+pub use crate::lib::Player;
+
 fn main() {
-    println!("Hello, world!");
+    let player = Player::new("Namir");
+    player.show_status();
 }
