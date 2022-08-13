@@ -8,13 +8,32 @@ trait Info {
     }
 }
 
+struct Item {
+    name: String,
+    description: String,
+}
+impl Item {
+    fn none() -> Item {
+        Item {
+            name: String::from("None"),
+            description: String::from("[...]"),
+        }
+    }
+}
+impl fmt::Display for Item {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.name)
+    }
+}
+
 struct Attributes {
     strength: u8,
     constitution: u8,
     intelligence: u8,
     speed: u8,
     luck: u8,
-} impl Attributes {
+}
+impl Attributes {
     fn new() -> Attributes {
         Attributes {
             strength: 20,
@@ -24,87 +43,67 @@ struct Attributes {
             luck: 15,
         }
     }
-    fn show(&self) {
-        println!("Attributes: ");
-        println!("  strength: {}", self.strength);
-        println!("  constitution: {}", self.constitution);
-        println!("  intelligence: {}", self.intelligence);
-        println!("  speed: {}", self.speed);
-        println!("  luck: {}", self.luck);
-    }
 }
-
-struct Weapon {
-    name: String,
-    description: String,
-} impl fmt::Display for Weapon {
+impl fmt::Display for Attributes {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", self.name.as_str())
+        write!(f, "\n  strength: {}\n  constitution: {}\n  intelligence: {}\n  speed: {}\n  luck: {}",
+        self.strength, self.constitution, self.intelligence, self.speed, self.luck)
     }
-}
-
-struct HeadArmor {
-    name: String,
-    description: String,
-}
-
-struct BodyArmor {
-    name: String,
-    description: String,
-}
-
-struct Accessory {
-    name: String,
-    description: String,
 }
 
 struct Equipments {
-    weapon: Option<Weapon>,
-    head: Option<HeadArmor>,
-    body: Option<BodyArmor>,
-    accessories: [Option<Accessory>; 4]
-} impl Equipments {
+    weapon: Item,
+    head: Item,
+    body: Item,
+    accessory_1: Item,
+    accessory_2: Item,
+    accessory_3: Item,
+    accessory_4: Item,
+}
+impl Equipments {
     fn new() -> Equipments {
         Equipments {
-            weapon: None,
-            head: None,
-            body: None,
-            accessories: [None, None, None, None]
+            weapon: Item::none(),
+            head: Item::none(),
+            body: Item::none(),
+            accessory_1: Item::none(),
+            accessory_2: Item::none(),
+            accessory_3: Item::none(),
+            accessory_4: Item::none(),
         }
     }
-
-    fn show(&self) {
-        println!("Equipment:");
-        println!("weapon: {}", self.weapon);
-        println!("head: {}");
-        println!("body: {}");
-        println!("accessories: {}");
+}
+impl fmt::Display for Equipments {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "\n  weapon: {}\n  head: {}\n  body: {}\n  accessories: {}\n  {}\n  {}\n  {}",
+        self.weapon, self.head, self.body, self.accessory_1, self.accessory_2, self.accessory_3, self.accessory_4)
     }
 }
 
 pub struct Player {
     name: String,
     level: u8,
+    exp: u32,
     hp: u16,
     attributes: Attributes,
     equipment: Equipments,
-} impl Player {
-    pub fn show(&self) {
-        println!("name: {}", self.name);
-        println!("\tlevel: {}", self.level);
-        println!("\thp: {}", self.hp);
-        self.attributes.show();
-        self.equipment.show();
-    }
-
-    pub fn new(name: String) -> Player {
+}
+impl Player {
+    pub fn new(name: &str) -> Player {
         Player {
-            name,
+            name: name.to_string(),
             level: 1,
+            exp: 0,
             hp: 80,
             attributes: Attributes::new(),
             equipment: Equipments::new(),
         }
+    }
+}
+impl fmt::Display for Player {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "name: {}\nlevel: {}\nexp: {}\nhp: {}\nattributes:\n{}\nequipment:\n{}",
+        self.name, self.level, self.exp, self.hp, self.attributes, self.equipment)
     }
 }
 
