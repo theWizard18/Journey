@@ -1,9 +1,12 @@
 use std::fmt;
 
+const EXP_MAX: u32 = 1000000;
+const LV_MAX: u8 = 100;
+
 trait Info {
     fn get_name(&self) -> String;
     fn get_description(&self) -> String;
-    fn output_data(&self) {
+    fn show_info(&self) {
         println!("{}:\n{}", self.get_name(), self.get_description());
     }
 }
@@ -83,6 +86,7 @@ impl fmt::Display for Equipments {
 pub struct Player {
     name: String,
     level: u8,
+    lv_up_threshold: u32,
     exp: u32,
     hp: u16,
     attributes: Attributes,
@@ -93,11 +97,24 @@ impl Player {
         Player {
             name: name.to_string(),
             level: 1,
+            lv_up_threshold: 2u32.pow(3),
             exp: 0,
             hp: 80,
             attributes: Attributes::new(),
             equipment: Equipments::new(),
         }
+    }
+    fn increment_exp_by(&mut self, num: u32) {
+        if self.exp <= EXP_MAX {
+            self.exp += num;
+        }
+        while self.exp > self.lv_up_threshold {
+            self.level_up();
+        }
+    }
+    fn level_up(&mut self) {
+        self.level;
+        self.lv_up_threshold = (self.level as u32+1).pow(3);
     }
 }
 impl fmt::Display for Player {
