@@ -1,9 +1,9 @@
 mod lib;
 
-pub use crate::lib::Player;
+pub use crate::lib::Combatant;
 
 fn main() {
     print!("{}", termion::clear::All);
-    let player = Player::new("Namir");
+    let player = Combatant::new("Namir");
     player.details();
 }

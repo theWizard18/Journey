@@ -3,7 +3,7 @@ const LV_MAX: u8 = 100;
 
 #[derive (Copy, Clone)]
 enum ItemClass {
-    None,
+    Null,
     Weapon,
     Head_armor,
     Body_armor,
@@ -30,7 +30,7 @@ impl Item {
         Item {
             name: String::from("None"),
             description: String::from("[...]"),
-            class: ItemClass::None,
+            class: ItemClass::Null,
         }
     }
 }
@@ -81,7 +81,7 @@ impl Equipments {
     }
 }
 
-pub struct Player {
+pub struct Combatant {
     name: String,
     level: u8,
     lv_up_threshold: u32,
@@ -91,9 +91,9 @@ pub struct Player {
     attributes: Attributes,
     equipment: Equipments,
 }
-impl Player {
-    pub fn new(name: &str) -> Player {
-        Player {
+impl Combatant {
+    pub fn new(name: &str) -> Combatant {
+        Combatant {
             name: name.to_string(),
             level: 1,
             lv_up_threshold: 2u32.pow(3),
@@ -109,16 +109,31 @@ impl Player {
                  self.name, self.level, self.exp, self.lv_up_threshold-self.exp, self.current_hp, self.hp);
     }
     fn increment_exp_by(&mut self, num: u32) {
-        if self.exp <= EXP_MAX {
-            self.exp += num;
-        }
+        let sum = self.exp + num;
+        self.exp = match sum <= EXP_MAX {
+            true  => sum,
+            false => EXP_MAX,
+        };
         while self.exp > self.lv_up_threshold {
             self.level_up();
         }
     }
     fn level_up(&mut self) {
-        self.level;
+        self.level += 1;
         self.lv_up_threshold = (self.level as u32+1).pow(3);
     }
 }
 
+struct Party {
+    members: Vec<Combatant>,
+}
+impl Party {
+    fn new(members: Vec<Combatant>) -> Party {
+        Party {
+            members,
+        }
+    }
+    fn recruit(&mut self, new_guy: Combatant) {
+        self.members.push(new_guy);
+    }
+}
