@@ -1,34 +1,43 @@
 const EXP_MAX: u32 = 1000000;
 const LV_MAX: u8 = 100;
 
-trait GetInfo {
+#[derive (Copy, Clone)]
+enum ItemClass {
+    None,
+    Weapon,
+    Head_armor,
+    Body_armor,
+    Accessory,
+    Letter,
+    Throwable,
+    Consumable,
+    Key,
+}
+
+trait GetData {
     fn name(&self) -> String;
     fn description(&self) -> String;
-    fn details(&self) {
-        println!("{}:\n{}", self.name(), self.description());
-    }
+    fn class(&self) -> ItemClass;
 }
 
 struct Item {
     name: String,
     description: String,
+    class: ItemClass,
 }
 impl Item {
     fn none() -> Item {
         Item {
             name: String::from("None"),
             description: String::from("[...]"),
+            class: ItemClass::None,
         }
     }
-    fn name(&self) -> String {
-        self.name.clone()
-    }
-    fn description(&self) -> String {
-        self.description.clone()
-    }
-    fn details(&self) -> String {
-        format!("{}:\n{}", self.name, self.description)
-    }
+}
+impl GetData for Item {
+    fn name(&self) -> String { self.name.clone() }
+    fn description(&self) -> String { self.description.clone() }
+    fn class(&self) -> ItemClass { self.class }
 }
 
 struct Attributes {
@@ -43,7 +52,7 @@ impl Attributes {
         Attributes {
             strength: 20,
             constitution: 15,
-            intelligence: 16,
+            intelligence: 15,
             speed: 18,
             luck: 15,
         }
