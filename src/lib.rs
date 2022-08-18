@@ -1,9 +1,11 @@
+use std::io::{self, Write};
+
 const EXP_MAX: u32 = 1000000;
 const LV_MAX: u8 = 100;
 
 #[derive (Copy, Clone)]
 enum ItemClass {
-    Null,
+    None,
     Weapon,
     Head_armor,
     Body_armor,
@@ -12,12 +14,6 @@ enum ItemClass {
     Throwable,
     Consumable,
     Key,
-}
-
-trait GetData {
-    fn name(&self) -> String;
-    fn description(&self) -> String;
-    fn class(&self) -> ItemClass;
 }
 
 struct Item {
@@ -30,11 +26,11 @@ impl Item {
         Item {
             name: String::from("None"),
             description: String::from("[...]"),
-            class: ItemClass::Null,
+            class: ItemClass::None,
         }
     }
 }
-impl GetData for Item {
+impl Item {
     fn name(&self) -> String { self.name.clone() }
     fn description(&self) -> String { self.description.clone() }
     fn class(&self) -> ItemClass { self.class }
@@ -106,12 +102,21 @@ impl Combatant {
     }
     pub fn details(&self) {
         println!("Details:\n  name: {}\tlevel: {}\n  exp: {}\tnext: {}\n  hp: {}/{}",
-                 self.name, self.level, self.exp, self.lv_up_threshold-self.exp, self.current_hp, self.hp);
+            self.name, self.level, self.exp, self.lv_up_threshold-self.exp, self.current_hp, self.hp);
+    }
+    fn equip(&mut self, index: usize, items: &mut Vec<Item>) {
+        match items[index].class {
+            ItemClass::Weapon => self.equipment.weapon = items.remove(index),
+            ItemClass::Head_armor => self.equipment.head = items.remove(index),
+            ItemClass::Body_armor => self.equipment.body = items.remove(index),
+            ItemClass::Accessory => self.equipment.weapon = items.remove(index),
+            _ => println!("this item cannot be equipped."),
+        };
     }
     fn increment_exp_by(&mut self, num: u32) {
         let sum = self.exp + num;
         self.exp = match sum <= EXP_MAX {
-            true  => sum,
+            true => sum,
             false => EXP_MAX,
         };
         while self.exp > self.lv_up_threshold {
@@ -126,14 +131,27 @@ impl Combatant {
 
 struct Party {
     members: Vec<Combatant>,
+    items: Vec<Item>,
 }
 impl Party {
-    fn new(members: Vec<Combatant>) -> Party {
+    fn new(members: Vec<Combatant>, items: Vec<Item>) -> Party {
         Party {
             members,
+            items,
         }
     }
     fn recruit(&mut self, new_guy: Combatant) {
         self.members.push(new_guy);
     }
+    fn store(&mut self, new_item: Item) {
+        self.items.push(new_item);
+    }
 }
+
+fn input(prompt: String) {
+    print!("{prompt}");
+    io::stdout().flush().expect("failed to flush the prompt");
+    let mut guess = String::new();
+    io::stdin().read_line(&mut guess).expect("failed to get input");
+}
+
