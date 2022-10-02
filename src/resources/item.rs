@@ -1,33 +1,43 @@
+
 #[derive (Copy, Clone)]
-enum ItemClass {
-    None,
-    Weapon,
-    Head_armor,
-    Body_armor,
-    Accessory,
-    Letter,
-    Throwable,
-    Consumable,
-    Key,
+enum Effect {
+
 }
 
-struct Item {
-    name: String,
+#[derive (Clone)]
+pub enum Item {
+    Equippable(Equippable),
+    Letter(Letter),
+    Consumable(Consumable),
+}
+
+#[derive (Copy, Clone)]
+pub enum EqpbleType {
+    Weapon,
+    Helmet,
+    Armor,
+    Accessory,
+}
+
+#[derive (Clone)]
+pub struct Equippable {
+    equip_type:  EqpbleType,
+    name:        String,
     description: String,
-    class: ItemClass,
+    effects:     Effect,
 }
-impl Item {
-    fn none() -> Item {
-        Item {
-            name: String::from("None"),
-            description: String::from("[...]"),
-            class: ItemClass::None,
-        }
-    }
+
+#[derive (Clone)]
+pub struct Letter {
+    name:    String,
+    message: String,
 }
-impl Item {
-    fn name(&self) -> String { self.name.clone() }
-    fn description(&self) -> String { self.description.clone() }
-    fn class(&self) -> ItemClass { self.class }
+
+#[derive (Clone)]
+pub struct Consumable {
+    name:           String,
+    description:    String,
+    consume_times:  u8,
+    effect:         Effect
 }
 

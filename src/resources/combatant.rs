@@ -1,95 +1,126 @@
+use crate::resources::party::Party;
+use crate::resources::item::{ Equippable, EqpbleType };
+
 const EXP_MAX: u32 = 1000000;
 
 pub struct Combatant {
-    name: String,
-    level: u8,
-    exp: u32,
-    current_hp: u16,
-    hp: u16,
+    name:       String,
+    party:      Option<Party>,
+    level:      u8,
+    exp:        u32,
     attributes: Attributes,
-    equipment: Equipments,
+    equipment:  Equipments,
 }
 impl Combatant {
     pub fn new(name: &str) -> Combatant {
         Combatant {
-            name: name.to_string(),
-            level: 1,
-            exp: 0,
-            current_hp: 80,
-            hp: 80,
+            name:       name.into(),
+            party:      None,
+            level:      1,
+            exp:        0,
             attributes: Attributes::new(),
-            equipment: Equipments::new(),
+            equipment:  Equipments::new(),
         }
     }
-    pub fn details(&self) {
-        println!("Details:\n  name: {}\tlevel: {}\n  exp: {}\tnext: {}\n  hp: {}/{}",
-            self.name, self.level, self.exp, self.lv_up_threshold()-self.exp, self.current_hp, self.hp);
-    }
+
     fn lv_up_threshold(&self) -> u32 {
         (self.level as u32 + 1).pow(3)
     }
-    fn equip(&mut self, index: usize, items: &mut Vec<Item>) {
-        match items[index].class {
-            ItemClass::Weapon => self.equipment.weapon = items.remove(index),
-            ItemClass::Head_armor => self.equipment.head = items.remove(index),
-            ItemClass::Body_armor => self.equipment.body = items.remove(index),
-            ItemClass::Accessory => self.equipment.weapon = items.remove(index),
-            _ => println!("this item cannot be equipped."),
-        };
-    }
+    
     fn increment_exp_by(&mut self, num: u32) {
         let sum = self.exp + num;
         self.exp = match sum <= EXP_MAX {
-            true => sum,
+            true  => sum,
             false => EXP_MAX,
         };
         while self.exp > self.lv_up_threshold() {
             self.level_up();
         }
     }
+    
     fn level_up(&mut self) {
         self.level += 1;
     }
 }
 
 struct Attributes {
-    strength: u8,
-    constitution: u8,
-    intelligence: u8,
-    speed: u8,
-    luck: u8,
+    default:    AttrsDefault,
+    modifiers:  AttrsModifiers,
 }
 impl Attributes {
     fn new() -> Attributes {
         Attributes {
-            strength: 20,
-            constitution: 15,
-            intelligence: 15,
-            speed: 18,
-            luck: 15,
+            default:   AttrsDefault::new(),
+            modifiers: AttrsModifiers::new(),
         }
     }
-    fn show(&self) {
-        println!(
-        "attributes:\n  strength: {}\n  constitution: {}\n  intelligence: {}\n  speed: {}\n  luck: {}",
-        self.strength, self.constitution, self.intelligence, self.speed, self.luck);
+}
+
+struct AttrsDefault {
+    hp:           u16,
+    strength:     u8,
+    constitution: u8,
+    intelligence: u8,
+    speed:        u8,
+    luck:         u8,
+}
+impl AttrsDefault {
+    fn new() -> AttrsDefault {
+        AttrsDefault {
+            hp:           80,
+            strength:     20,
+            constitution: 15,
+            intelligence: 15,
+            speed:        18,
+            luck:         15,
+        }
+    }
+}
+
+#[derive (Default)]
+struct AttrsModifiers {
+    hp:           i16,
+    strength:     i8,
+    constitution: i8,
+    intelligence: i8,
+    speed:        i8,
+    luck:         i8,
+}
+impl AttrsModifiers {
+    fn new() -> AttrsModifiers {
+        AttrsModifiers {
+            hp:           0,
+            strength:     0,
+            constitution: 0,
+            intelligence: 0,
+            speed:        0,
+            luck:         0,
+        }
     }
 }
 
 struct Equipments {
-    weapon: Item,
-    head: Item,
-    body: Item,
-    accessory: [Item; 4],
+    weapon:     Equippable,
+    head:       Equippable,
+    body:       Equippable,
+    accessory:  [Equippable; 4],
 }
 impl Equipments {
     fn new() -> Equipments {
         Equipments {
-            weapon: Item::none(),
-            head: Item::none(),
-            body: Item::none(),
-            accessory: [Item::none(), Item::none(), Item::none(), Item::none()]
+            weapon:    Equippable::none(),
+            head:      Equippable::none(),
+            body:      Equippable::none(),
+            accessory: [Equippable::none(); 4]
         }
+    }
+    
+    fn equip_weapon(&mut self, item: &Equippable) {
+        let buffer = self.weapon.clone();
+        match item.equip_type {
+            EqpbleType::Weapon => self.weapon = item.clone(),
+            _                  => println!("This item cannot be equipped as a Weapon")
+        };
     }
 }
 
