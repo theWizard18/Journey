@@ -1,6 +1,7 @@
-mod lib;
+mod game;
+mod resources;
 
-pub use crate::lib::Combatant;
+pub use crate::resources::combatant::Combatant;
 
 fn main() {
     print!("{}", termion::clear::All);
