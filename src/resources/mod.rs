@@ -1,3 +1,3 @@
+pub mod combatant;
 mod item;
 mod party;
-pub mod combatant;

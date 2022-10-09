@@ -6,10 +6,7 @@ pub struct Party {
 }
 impl Party {
     fn new(members: Vec<Combatant>, items: Vec<Item>) -> Party {
-        Party {
-            members,
-            items,
-        }
+        Party { members, items }
     }
     fn recruit(&mut self, new_member: Combatant) {
         self.members.push(new_member);
@@ -18,4 +15,3 @@ impl Party {
         self.items.push(new_item);
     }
 }
-
