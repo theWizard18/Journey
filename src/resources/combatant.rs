@@ -1,11 +1,9 @@
-use crate::resources::item::{EqpbleType, Equippable};
-use crate::resources::party::Party;
+use crate::resources::item::{EqpbleType, Equippable, new_equippable};
 
 const EXP_MAX: u32 = 1000000;
 
 pub struct Combatant {
     name: String,
-    party: Option<Party>,
     level: u8,
     exp: u32,
     attributes: Attributes,
@@ -15,7 +13,6 @@ impl Combatant {
     pub fn new(name: &str) -> Combatant {
         Combatant {
             name: name.into(),
-            party: None,
             level: 1,
             exp: 0,
             attributes: Attributes::new(),
@@ -40,6 +37,66 @@ impl Combatant {
 
     fn level_up(&mut self) {
         self.level += 1;
+    }
+
+    fn get_hp(&mut self) -> i16 {
+        self.equipment.weapon.effects.hp
+            .saturating_add(self.equipment.head.effects.hp)
+            .saturating_add(self.equipment.body.effects.hp)
+            .saturating_add(self.equipment.accessory[0].effects.hp)
+            .saturating_add(self.equipment.accessory[1].effects.hp)
+            .saturating_add(self.equipment.accessory[2].effects.hp)
+            .saturating_add(self.equipment.accessory[3].effects.hp)
+    }
+
+    fn get_strength(&mut self) -> i8 {
+        self.equipment.weapon.effects.strength
+            .saturating_add(self.equipment.head.effects.strength)
+            .saturating_add(self.equipment.body.effects.strength)
+            .saturating_add(self.equipment.accessory[0].effects.strength)
+            .saturating_add(self.equipment.accessory[1].effects.strength)
+            .saturating_add(self.equipment.accessory[2].effects.strength)
+            .saturating_add(self.equipment.accessory[3].effects.strength)
+    }
+
+    fn get_constitution(&mut self) -> i8 {
+        self.equipment.weapon.effects.constitution
+            .saturating_add(self.equipment.head.effects.constitution)
+            .saturating_add(self.equipment.body.effects.constitution)
+            .saturating_add(self.equipment.accessory[0].effects.constitution)
+            .saturating_add(self.equipment.accessory[1].effects.constitution)
+            .saturating_add(self.equipment.accessory[2].effects.constitution)
+            .saturating_add(self.equipment.accessory[3].effects.constitution)
+    }
+
+    fn get_intelligence(&mut self) -> i8 {
+        self.equipment.weapon.effects.intelligence
+            .saturating_add(self.equipment.head.effects.intelligence)
+            .saturating_add(self.equipment.body.effects.intelligence)
+            .saturating_add(self.equipment.accessory[0].effects.intelligence)
+            .saturating_add(self.equipment.accessory[1].effects.intelligence)
+            .saturating_add(self.equipment.accessory[2].effects.intelligence)
+            .saturating_add(self.equipment.accessory[3].effects.intelligence)
+    }
+
+    fn get_speed(&mut self) -> i8 {
+        self.equipment.weapon.effects.speed
+            .saturating_add(self.equipment.head.effects.speed)
+            .saturating_add(self.equipment.body.effects.speed)
+            .saturating_add(self.equipment.accessory[0].effects.speed)
+            .saturating_add(self.equipment.accessory[1].effects.speed)
+            .saturating_add(self.equipment.accessory[2].effects.speed)
+            .saturating_add(self.equipment.accessory[3].effects.speed)
+    }
+
+    fn get_luck(&mut self) -> i8 {
+        self.equipment.weapon.effects.luck
+            .saturating_add(self.equipment.head.effects.luck)
+            .saturating_add(self.equipment.body.effects.luck)
+            .saturating_add(self.equipment.accessory[0].effects.luck)
+            .saturating_add(self.equipment.accessory[1].effects.luck)
+            .saturating_add(self.equipment.accessory[2].effects.luck)
+            .saturating_add(self.equipment.accessory[3].effects.luck)
     }
 }
 
@@ -73,10 +130,15 @@ struct Equipments {
 impl Equipments {
     fn new() -> Equipments {
         Equipments {
-            weapon: Equippable::none(),
-            head: Equippable::none(),
-            body: Equippable::none(),
-            accessory: [Equippable::none(); 4],
+            weapon: new_equippable("none".into()),
+            head: new_equippable("none".into()),
+            body: new_equippable("none".into()),
+            accessory: [
+                new_equippable("none".into()),
+                new_equippable("none".into()),
+                new_equippable("none".into()),
+                new_equippable("none".into()),
+            ],
         }
     }
 
