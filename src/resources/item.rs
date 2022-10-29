@@ -1,11 +1,11 @@
 #[derive(Copy, Clone)]
-struct AttrsModifiers {
-    hp: i16,
-    strength: i8,
-    constitution: i8,
-    intelligence: i8,
-    speed: i8,
-    luck: i8,
+pub struct AttrsModifiers {
+    pub hp: i16,
+    pub strength: i8,
+    pub constitution: i8,
+    pub intelligence: i8,
+    pub speed: i8,
+    pub luck: i8,
 }
 impl AttrsModifiers {
     fn new() -> AttrsModifiers {
@@ -33,20 +33,21 @@ pub enum EqpbleType {
     Helmet,
     Armor,
     Accessory,
+    None,
 }
 
 #[derive(Clone)]
-struct ItemInfo {
-    name: String,
-    description: String,
+pub struct ItemInfo {
+    pub name: String,
+    pub description: String,
 }
 
 #[derive(Clone)]
 pub struct Equippable {
-    equip_type: EqpbleType,
-    info: ItemInfo,
-    effects: AttrsModifiers,
-    weariness: Option<u16>,
+    pub equip_type: EqpbleType,
+    pub info: ItemInfo,
+    pub effects: AttrsModifiers,
+    pub weariness: Option<u16>,
 }
 
 #[derive(Clone)]
@@ -60,4 +61,18 @@ pub struct Consumable {
     info: ItemInfo,
     consume_times: u8,
     effects: AttrsModifiers,
+}
+
+pub fn new_equippable(id: String)-> Equippable {
+    match id.as_str() {
+        _ => Equippable {
+            equip_type: EqpbleType::None,
+            info: ItemInfo {
+                name: "none".into(),
+                description: "...".into(),
+            },
+            effects: AttrsModifiers::new(),
+            weariness: None,
+        }
+    }
 }
