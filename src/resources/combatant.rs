@@ -1,4 +1,4 @@
-use crate::resources::item::{EqpbleType, Equippable, new_equippable};
+use crate::resources::item;
 
 const EXP_MAX: u32 = 1000000;
 
@@ -10,8 +10,8 @@ pub struct Combatant {
     equipment: Equipments,
 }
 impl Combatant {
-    pub fn new(name: &str) -> Combatant {
-        Combatant {
+    pub fn new(name: &str) -> Self {
+        Self {
             name: name.into(),
             level: 1,
             exp: 0,
@@ -36,141 +36,151 @@ impl Combatant {
     }
 
     fn level_up(&mut self) {
-        self.level += 1;
+        self.level.saturating_add(1);
     }
 
-    fn hp(&self) -> i16 {
-        self.equipment.weapon.effects.hp
-            .saturating_add(self.equipment.head.effects.hp)
-            .saturating_add(self.equipment.body.effects.hp)
-            .saturating_add(self.equipment.accessory[0].effects.hp)
-            .saturating_add(self.equipment.accessory[1].effects.hp)
-            .saturating_add(self.equipment.accessory[2].effects.hp)
-            .saturating_add(self.equipment.accessory[3].effects.hp)
+    fn health(&self) -> u16 {
+        let sum = self.equipment.weapon_a.mod_attr.health
+            .saturating_add(self.equipment.weapon_b.mod_attr.health)
+            .saturating_add(self.equipment.armor.mod_attr.health)
+            .saturating_add(self.equipment.accessory_a.mod_attr.health)
+            .saturating_add(self.equipment.accessory_b.mod_attr.health);
+        let attr = self.attributes.base_health;
+        self.hp_sp_mod(attr, sum)
     }
 
-    fn sp(&self) -> i8 {
-        self.equipment.weapon.effects.sp
-            .saturating_add(self.equipment.head.effects.sp)
-            .saturating_add(self.equipment.body.effects.sp)
-            .saturating_add(self.equipment.accessory[0].effects.sp)
-            .saturating_add(self.equipment.accessory[1].effects.sp)
-            .saturating_add(self.equipment.accessory[2].effects.sp)
-            .saturating_add(self.equipment.accessory[3].effects.sp)
+    fn skill(&self) -> u16 {
+        let sum = self.equipment.weapon_a.mod_attr.skill
+            .saturating_add(self.equipment.weapon_b.mod_attr.skill)
+            .saturating_add(self.equipment.armor.mod_attr.skill)
+            .saturating_add(self.equipment.accessory_a.mod_attr.skill)
+            .saturating_add(self.equipment.accessory_b.mod_attr.skill);
+        let attr = self.attributes.base_skill;
+        self.hp_sp_mod(attr, sum)
     }
 
-    fn strength(&self) -> i8 {
-        self.equipment.weapon.effects.strength
-            .saturating_add(self.equipment.head.effects.strength)
-            .saturating_add(self.equipment.body.effects.strength)
-            .saturating_add(self.equipment.accessory[0].effects.strength)
-            .saturating_add(self.equipment.accessory[1].effects.strength)
-            .saturating_add(self.equipment.accessory[2].effects.strength)
-            .saturating_add(self.equipment.accessory[3].effects.strength)
+    fn strength(&self) -> u8 {
+        let sum = self.equipment.weapon_a.mod_attr.strength
+            .saturating_add(self.equipment.weapon_b.mod_attr.strength)
+            .saturating_add(self.equipment.armor.mod_attr.strength)
+            .saturating_add(self.equipment.accessory_a.mod_attr.strength)
+            .saturating_add(self.equipment.accessory_b.mod_attr.strength);
+        let attr = self.attributes.base_strength;
+        self.attr_mod(attr, sum)
     }
 
-    fn constitution(&self) -> i8 {
-        self.equipment.weapon.effects.constitution
-            .saturating_add(self.equipment.head.effects.constitution)
-            .saturating_add(self.equipment.body.effects.constitution)
-            .saturating_add(self.equipment.accessory[0].effects.constitution)
-            .saturating_add(self.equipment.accessory[1].effects.constitution)
-            .saturating_add(self.equipment.accessory[2].effects.constitution)
-            .saturating_add(self.equipment.accessory[3].effects.constitution)
+    fn constitution(&self) -> u8 {
+        let sum = self.equipment.weapon_a.mod_attr.constitution
+            .saturating_add(self.equipment.weapon_b.mod_attr.constitution)
+            .saturating_add(self.equipment.armor.mod_attr.constitution)
+            .saturating_add(self.equipment.accessory_a.mod_attr.constitution)
+            .saturating_add(self.equipment.accessory_b.mod_attr.constitution);
+        let attr = self.attributes.base_constitution;
+        self.attr_mod(attr, sum)
     }
 
-    fn intelligence(&self) -> i8 {
-        self.equipment.weapon.effects.intelligence
-            .saturating_add(self.equipment.head.effects.intelligence)
-            .saturating_add(self.equipment.body.effects.intelligence)
-            .saturating_add(self.equipment.accessory[0].effects.intelligence)
-            .saturating_add(self.equipment.accessory[1].effects.intelligence)
-            .saturating_add(self.equipment.accessory[2].effects.intelligence)
-            .saturating_add(self.equipment.accessory[3].effects.intelligence)
+    fn intelligence(&self) -> u8 {
+        let sum = self.equipment.weapon_a.mod_attr.intelligence
+            .saturating_add(self.equipment.weapon_b.mod_attr.intelligence)
+            .saturating_add(self.equipment.armor.mod_attr.intelligence)
+            .saturating_add(self.equipment.accessory_a.mod_attr.intelligence)
+            .saturating_add(self.equipment.accessory_b.mod_attr.intelligence);
+        let attr = self.attributes.base_intelligence;
+        self.attr_mod(attr, sum)
     }
 
-    fn luck(&self) -> i8 {
-        self.equipment.weapon.effects.luck
-            .saturating_add(self.equipment.head.effects.luck)
-            .saturating_add(self.equipment.body.effects.luck)
-            .saturating_add(self.equipment.accessory[0].effects.luck)
-            .saturating_add(self.equipment.accessory[1].effects.luck)
-            .saturating_add(self.equipment.accessory[2].effects.luck)
-            .saturating_add(self.equipment.accessory[3].effects.luck)
+    fn luck(&self) -> u8 {
+        let sum = self.equipment.weapon_a.mod_attr.luck
+            .saturating_add(self.equipment.weapon_b.mod_attr.luck)
+            .saturating_add(self.equipment.armor.mod_attr.luck)
+            .saturating_add(self.equipment.accessory_a.mod_attr.luck)
+            .saturating_add(self.equipment.accessory_b.mod_attr.luck);
+        let attr = self.attributes.base_luck;
+        self.attr_mod(attr, sum)
     }
 
-    fn accuracy(&self) -> i8 {
-        self.equipment.weapon.effects.accuracy
-            .saturating_add(self.equipment.head.effects.accuracy)
-            .saturating_add(self.equipment.body.effects.accuracy)
-            .saturating_add(self.equipment.accessory[0].effects.accuracy)
-            .saturating_add(self.equipment.accessory[1].effects.accuracy)
-            .saturating_add(self.equipment.accessory[2].effects.accuracy)
-            .saturating_add(self.equipment.accessory[3].effects.accuracy)
+    fn accuracy(&self) -> u8 {
+        let sum = self.equipment.weapon_a.mod_attr.accuracy
+            .saturating_add(self.equipment.weapon_b.mod_attr.accuracy)
+            .saturating_add(self.equipment.armor.mod_attr.accuracy)
+            .saturating_add(self.equipment.accessory_a.mod_attr.accuracy)
+            .saturating_add(self.equipment.accessory_b.mod_attr.accuracy);
+        let attr = self.attributes.base_accuracy;
+        self.attr_mod(attr, sum)
     }
 
-    fn speed(&self) -> i8 {
-        self.equipment.weapon.effects.speed
-            .saturating_add(self.equipment.head.effects.speed)
-            .saturating_add(self.equipment.body.effects.speed)
-            .saturating_add(self.equipment.accessory[0].effects.speed)
-            .saturating_add(self.equipment.accessory[1].effects.speed)
-            .saturating_add(self.equipment.accessory[2].effects.speed)
-            .saturating_add(self.equipment.accessory[3].effects.speed)
+    fn speed(&self) -> u8 {
+        let sum = self.equipment.weapon_a.mod_attr.speed
+            .saturating_add(self.equipment.weapon_b.mod_attr.speed)
+            .saturating_add(self.equipment.armor.mod_attr.speed)
+            .saturating_add(self.equipment.accessory_a.mod_attr.speed)
+            .saturating_add(self.equipment.accessory_b.mod_attr.speed);
+        let attr = self.attributes.base_speed;
+        self.attr_mod(attr, sum)
+    }
+
+    fn attr_mod(&self, attr: u8, modify: i8) -> u8 {
+        match modify < 0 {
+            false => attr.saturating_add(modify as u8),
+            true => attr.saturating_sub(-modify as u8),
+        }
+    }
+
+    fn hp_sp_mod(&self, attr: u16, modify: i16) -> u16 {
+        match modify < 0 {
+            false => attr.saturating_add(modify as u16),
+            true => attr.saturating_sub(-modify as u16),
+        }
     }
 }
 
 struct Attributes {
-    hp: u16,
-    sp: u8,
-    strength: u8,
-    constitution: u8,
-    intelligence: u8,
-    luck: u8,
-    accuracy: u8,
-    speed: u8,
+    base_health: u16,
+    current_health: u16,
+    base_skill: u16,
+    current_skill: u16,
+    base_strength: u8,
+    base_constitution: u8,
+    base_intelligence: u8,
+    base_luck: u8,
+    base_accuracy: u8,
+    base_speed: u8,
 }
 impl Attributes {
     fn new() -> Self {
         Self {
-            hp: 80,
-            sp: 14,
-            strength: 20,
-            constitution: 15,
-            intelligence: 15,
-            luck: 15,
-            accuracy: 20,
-            speed: 18,
+            base_health: 80,
+            current_health: 80,
+            base_skill: 14,
+            current_skill: 14,
+            base_strength: 20,
+            base_constitution: 15,
+            base_intelligence: 15,
+            base_luck: 15,
+            base_accuracy: 20,
+            base_speed: 18,
         }
     }
 }
 
 struct Equipments {
-    weapon: Equippable,
-    head: Equippable,
-    body: Equippable,
-    accessory: [Equippable; 4],
+    weapon_a: item::Weapon,
+    weapon_b: item::Weapon,
+    armor: item::Armor,
+    accessory_a: item::Accessory,
+    accessory_b: item::Accessory,
 }
 impl Equipments {
     fn new() -> Self {
         Self {
-            weapon: new_equippable("none"),
-            head: new_equippable("none"),
-            body: new_equippable("none"),
-            accessory: [
-                new_equippable("none"),
-                new_equippable("none"),
-                new_equippable("none"),
-                new_equippable("none"),
-            ],
+            weapon_a: item::new_weapon("none"),
+            weapon_b: item::new_weapon("none"),
+            armor: item::new_armor("none"),
+            accessory_a: item::new_accessory("none"),
+            accessory_b: item::new_accessory("none"),
         }
     }
 
-    fn equip_weapon(&mut self, item: &Equippable) {
-        let buffer = self.weapon.clone();
-        match item.equip_type {
-            EqpbleType::Weapon => self.weapon = item.clone(),
-            _ => println!("This item cannot be equipped as a Weapon"),
-        };
+    fn equip_weapon(&mut self, item: &item::Weapon) {
     }
 }
