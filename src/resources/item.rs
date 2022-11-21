@@ -1,39 +1,15 @@
-#[derive(Copy, Clone)]
-pub struct AttrsModifiers {
-    pub hp: i16,
-    pub strength: i8,
-    pub constitution: i8,
-    pub intelligence: i8,
-    pub speed: i8,
-    pub luck: i8,
-}
-impl AttrsModifiers {
-    fn new() -> AttrsModifiers {
-        AttrsModifiers {
-            hp: 0,
-            strength: 0,
-            constitution: 0,
-            intelligence: 0,
-            speed: 0,
-            luck: 0,
-        }
-    }
-}
-
 #[derive(Clone)]
 pub enum Item {
-    Equippable(Equippable),
+    Weapon(Weapon),
+    Armor(Armor),
+    Accessory(Accessory),
     Letter(Letter),
     Consumable(Consumable),
 }
 
-#[derive(Copy, Clone)]
-pub enum EqpbleType {
-    Weapon,
-    Helmet,
-    Armor,
-    Accessory,
-    None,
+#[derive(Clone)]
+pub enum WpnType {
+    Sword, Axe, Lance, Staff, Knife, Hammer, Shield, None,
 }
 
 #[derive(Clone)]
@@ -42,12 +18,37 @@ pub struct ItemInfo {
     pub description: String,
 }
 
+#[derive(Clone, Default)]
+pub struct ItemAttr {
+    pub health: i16,
+    pub skill: i16,
+    pub strength: i8,
+    pub constitution: i8,
+    pub intelligence: i8,
+    pub luck: i8,
+    pub accuracy: i8,
+    pub speed: i8,
+}
+
 #[derive(Clone)]
-pub struct Equippable {
-    pub equip_type: EqpbleType,
+pub struct Weapon {
     pub info: ItemInfo,
-    pub effects: AttrsModifiers,
-    pub weariness: Option<u16>,
+    pub wpn_type: WpnType,
+    pub mod_attr: ItemAttr,
+    pub durability: Option<u16>,
+}
+
+#[derive(Clone)]
+pub struct Armor {
+    pub info: ItemInfo,
+    pub mod_attr: ItemAttr,
+    pub durability: Option<u16>,
+}
+
+#[derive(Clone)]
+pub struct Accessory {
+    pub info: ItemInfo,
+    pub mod_attr: ItemAttr,
 }
 
 #[derive(Clone)]
@@ -60,19 +61,43 @@ pub struct Letter {
 pub struct Consumable {
     info: ItemInfo,
     consume_times: u8,
-    effects: AttrsModifiers,
 }
 
-pub fn new_equippable(id: String)-> Equippable {
-    match id.as_str() {
-        _ => Equippable {
-            equip_type: EqpbleType::None,
+pub fn new_weapon(id: &str) -> Weapon {
+    match id {
+        _ => Weapon {
             info: ItemInfo {
                 name: "none".into(),
                 description: "...".into(),
             },
-            effects: AttrsModifiers::new(),
-            weariness: None,
+            wpn_type: WpnType::None,
+            mod_attr: Default::default(),
+            durability: None,
+        }
+    }
+}
+
+pub fn new_armor(id: &str) -> Armor {
+    match id {
+        _ => Armor {
+            info: ItemInfo {
+                name: "none".into(),
+                description: "...".into(),
+            },
+            mod_attr: Default::default(),
+            durability: None,
+        }
+    }
+}
+
+pub fn new_accessory(id: &str) -> Accessory {
+    match id {
+        _ => Accessory {
+            info: ItemInfo {
+                name: "none".into(),
+                description: "...".into(),
+            },
+            mod_attr: Default::default(),
         }
     }
 }
