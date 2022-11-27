@@ -14,5 +14,11 @@ impl Party {
     fn store(&mut self, new_item: Item) {
         self.items.push(new_item);
     }
+    pub fn can_fight(&self) -> bool {
+        for member in self.members.iter() {
+            if member.is_alive() {return true}
+        }
+        false
+    }
 }
 
