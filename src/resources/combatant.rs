@@ -7,6 +7,7 @@ pub struct Combatant {
     name: String,
     level: u8,
     exp: u32,
+    status: Status,
     attributes: Attributes,
     equipment: Equipments,
     proficiencies: Proficiencies,
@@ -17,17 +18,16 @@ impl Combatant {
             name: name.into(),
             level: 1,
             exp: 0,
+            status: Default::default(),
             attributes: Attributes::new(),
             equipment: Equipments::new(),
             proficiencies: Proficiencies::new(),
         }
     }
-
     fn lv_up_threshold(&self) -> u32 {
         (self.level as u32 + 1).pow(3)
     }
-
-    fn increment_exp_by(&mut self, num: u32) {
+    pub fn increment_exp_by(&mut self, num: u32) {
         let sum = self.exp + num;
         self.exp = match sum <= EXP_MAX {
             true => sum,
@@ -37,7 +37,6 @@ impl Combatant {
             self.level_up();
         }
     }
-
     fn level_up(&mut self) {
         self.level += 1;
         self.attributes.base_health.increment();
@@ -49,8 +48,10 @@ impl Combatant {
         self.attributes.base_speed.increment();
         self.attributes.base_accuracy.increment();
     }
-
-    fn health(&self) -> u16 {
+    pub fn is_alive(&self) -> bool {
+        self.health() > 0
+    }
+    pub fn health(&self) -> u16 {
         let sum = self.equipment.weapon_a.mod_attr.health
             .saturating_add(self.equipment.weapon_b.mod_attr.health)
             .saturating_add(self.equipment.armor.mod_attr.health)
@@ -59,8 +60,7 @@ impl Combatant {
         let attr = self.attributes.base_health;
         attr.attr_mod(sum)
     }
-
-    fn skill(&self) -> u16 {
+    pub fn skill(&self) -> u16 {
         let sum = self.equipment.weapon_a.mod_attr.skill
             .saturating_add(self.equipment.weapon_b.mod_attr.skill)
             .saturating_add(self.equipment.armor.mod_attr.skill)
@@ -69,8 +69,7 @@ impl Combatant {
         let attr = self.attributes.base_skill;
         attr.attr_mod(sum)
     }
-
-    fn strength(&self) -> u8 {
+    pub fn strength(&self) -> u8 {
         let sum = self.equipment.weapon_a.mod_attr.strength
             .saturating_add(self.equipment.weapon_b.mod_attr.strength)
             .saturating_add(self.equipment.armor.mod_attr.strength)
@@ -79,8 +78,7 @@ impl Combatant {
         let attr = self.attributes.base_strength;
         attr.attr_mod(sum)
     }
-
-    fn constitution(&self) -> u8 {
+    pub fn constitution(&self) -> u8 {
         let sum = self.equipment.weapon_a.mod_attr.constitution
             .saturating_add(self.equipment.weapon_b.mod_attr.constitution)
             .saturating_add(self.equipment.armor.mod_attr.constitution)
@@ -89,8 +87,7 @@ impl Combatant {
         let attr = self.attributes.base_constitution;
         attr.attr_mod(sum)
     }
-
-    fn intelligence(&self) -> u8 {
+    pub fn intelligence(&self) -> u8 {
         let sum = self.equipment.weapon_a.mod_attr.intelligence
             .saturating_add(self.equipment.weapon_b.mod_attr.intelligence)
             .saturating_add(self.equipment.armor.mod_attr.intelligence)
@@ -99,8 +96,7 @@ impl Combatant {
         let attr = self.attributes.base_intelligence;
         attr.attr_mod(sum)
     }
-
-    fn luck(&self) -> u8 {
+    pub fn luck(&self) -> u8 {
         let sum = self.equipment.weapon_a.mod_attr.luck
             .saturating_add(self.equipment.weapon_b.mod_attr.luck)
             .saturating_add(self.equipment.armor.mod_attr.luck)
@@ -109,8 +105,7 @@ impl Combatant {
         let attr = self.attributes.base_luck;
         attr.attr_mod(sum)
     }
-
-    fn accuracy(&self) -> u8 {
+    pub fn accuracy(&self) -> u8 {
         let sum = self.equipment.weapon_a.mod_attr.accuracy
             .saturating_add(self.equipment.weapon_b.mod_attr.accuracy)
             .saturating_add(self.equipment.armor.mod_attr.accuracy)
@@ -119,8 +114,7 @@ impl Combatant {
         let attr = self.attributes.base_accuracy;
         attr.attr_mod(sum)
     }
-
-    fn speed(&self) -> u8 {
+    pub fn speed(&self) -> u8 {
         let sum = self.equipment.weapon_a.mod_attr.speed
             .saturating_add(self.equipment.weapon_b.mod_attr.speed)
             .saturating_add(self.equipment.armor.mod_attr.speed)
@@ -167,7 +161,7 @@ impl Attr<u16> {
     }
 }
 
-struct Attributes {
+pub struct Attributes {
     base_health: Attr<u16>,
     current_health: u16,
     base_skill: Attr<u16>,
@@ -223,13 +217,12 @@ impl Equipments {
             accessory_b: item::new_accessory("none"),
         }
     }
-
     fn equip_weapon(&mut self, item: &item::Weapon) {
     }
 }
 
 #[derive(Default)]
-struct Proficiencies {
+struct Proficiencies { // how proficient a combatant is with a given type of weapon
     sword: u8,
     axe: u8,
     lance: u8,
@@ -242,4 +235,11 @@ impl Proficiencies {
     fn new() -> Self {
         Default::default()
     }
+}
+
+#[derive(Default)]
+enum Status {
+    #[default]
+    Normal,     Paralysed,  Blind,
+    Poisoned,   Confused,   Berserk
 }
